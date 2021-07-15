@@ -3,7 +3,7 @@ require "colorize"
 
 describe "Platform" do
   before_all do
-    # LOGGING.debug `pwd` 
+    # LOGGING.debug `pwd`
     # LOGGING.debug `echo $KUBECONFIG`
     `./cnf-testsuite samples_cleanup`
     $?.success?.should be_true
@@ -39,4 +39,3 @@ describe "Platform" do
     (/PASSED: K8s conformance test has no failures/ =~ response_s).should_not be_nil
   end
 end
-

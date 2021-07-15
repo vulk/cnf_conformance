@@ -13,7 +13,7 @@ describe "Scalability" do
     $?.success?.should be_true
   end
 
-it "'scalability' should run all of the scalability tests", tags: "[scalability]"  do
+  it "'scalability' should run all of the scalability tests", tags: "[scalability]" do
     `./cnf-testsuite samples_cleanup`
     response_s = `./cnf-testsuite setup`
     LOGGING.info response_s

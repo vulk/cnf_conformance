@@ -14,4 +14,3 @@ task "install_opa" do |_, args|
     end
   end
 end
-

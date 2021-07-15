@@ -6,41 +6,41 @@ require "uuid"
 require "./points.cr"
 require "./task.cr"
 
-module CNFManager 
-
+module CNFManager
   class Config
-    def initialize(cnf_config, airgapped=false)
-      @cnf_config = cnf_config 
+    def initialize(cnf_config, airgapped = false)
+      @cnf_config = cnf_config
       @airgapped = airgapped
     end
-    property cnf_config : NamedTuple(destination_cnf_dir: String,
-                                     source_cnf_file: String,
-                                     source_cnf_dir: String,
-                                     yml_file_path: String,
-                                     install_method: Tuple(Symbol, String),
-                                     manifest_directory: String,
-                                     helm_directory: String, 
-                                     helm_chart_path: String, 
-                                     manifest_file_path: String, 
-                                     git_clone_url: String,
-                                     install_script: String,
-                                     release_name: String,
-                                     service_name:  String,
-                                     docker_repository: String,
-                                     helm_repository: NamedTuple(name:  String, 
-                                                                 repo_url:  String) | Nil,
-                                     helm_chart:  String,
-                                     helm_chart_container_name: String,
-                                     rolling_update_tag: String,
-                                     container_names: Array(Hash(String, String )) | Nil,
-                                     white_list_container_names: Array(String)) 
 
-    def self.parse_config_yml(config_yml_path : String, airgapped=false, generate_tar_mode=false) : CNFManager::Config
+    property cnf_config : NamedTuple(destination_cnf_dir: String,
+      source_cnf_file: String,
+      source_cnf_dir: String,
+      yml_file_path: String,
+      install_method: Tuple(Symbol, String),
+      manifest_directory: String,
+      helm_directory: String,
+      helm_chart_path: String,
+      manifest_file_path: String,
+      git_clone_url: String,
+      install_script: String,
+      release_name: String,
+      service_name: String,
+      docker_repository: String,
+      helm_repository: NamedTuple(name: String,
+        repo_url: String) | Nil,
+      helm_chart: String,
+      helm_chart_container_name: String,
+      rolling_update_tag: String,
+      container_names: Array(Hash(String, String)) | Nil,
+      white_list_container_names: Array(String))
+
+    def self.parse_config_yml(config_yml_path : String, airgapped = false, generate_tar_mode = false) : CNFManager::Config
       LOGGING.debug "parse_config_yml config_yml_path: #{config_yml_path}"
       LOGGING.info "airgapped: #{airgapped}"
       LOGGING.info "generate_tar_mode: #{generate_tar_mode}"
       yml_file = CNFManager.ensure_cnf_testsuite_yml_path(config_yml_path)
-      #TODO modify the destination testsuite yml instead of the source testsuite yml 
+      # TODO modify the destination testsuite yml instead of the source testsuite yml
       # (especially in the case of the release manager).  Then reread the destination config
       # TODO for cleanup, read source, then find destination and use release name from destination config
       # TODO alternatively use a CRD to save the release name
@@ -56,7 +56,7 @@ module CNFManager
       source_cnf_dir = yml_file_path
       manifest_directory = optional_key_as_string(config, "manifest_directory")
       if config["helm_repository"]?
-          helm_repository = config["helm_repository"].as_h
+        helm_repository = config["helm_repository"].as_h
         helm_repo_name = optional_key_as_string(helm_repository, "name")
         helm_repo_url = optional_key_as_string(helm_repository, "repo_url")
       else
@@ -75,7 +75,7 @@ module CNFManager
       else
         working_chart_directory = helm_directory
       end
-      helm_chart_path = destination_cnf_dir + "/" + working_chart_directory 
+      helm_chart_path = destination_cnf_dir + "/" + working_chart_directory
       helm_chart_path = Path[helm_chart_path].expand.to_s
       manifest_file_path = destination_cnf_dir + "/" + "temp_template.yml"
       white_list_container_names = optional_key_as_string(config, "allowlist_helm_chart_container_names")
@@ -89,43 +89,42 @@ module CNFManager
       if config["container_names"]?
         container_names_totem = config["container_names"]
         container_names = container_names_totem.as_a.map do |container|
-          {"name" => optional_key_as_string(container, "name"),
-           "rolling_update_test_tag" => optional_key_as_string(container, "rolling_update_test_tag"),
-           "rolling_downgrade_test_tag" => optional_key_as_string(container, "rolling_downgrade_test_tag"),
+          {"name"                            => optional_key_as_string(container, "name"),
+           "rolling_update_test_tag"         => optional_key_as_string(container, "rolling_update_test_tag"),
+           "rolling_downgrade_test_tag"      => optional_key_as_string(container, "rolling_downgrade_test_tag"),
            "rolling_version_change_test_tag" => optional_key_as_string(container, "rolling_version_change_test_tag"),
-           "rollback_from_tag" => optional_key_as_string(container, "rollback_from_tag"),
-           }
+           "rollback_from_tag"               => optional_key_as_string(container, "rollback_from_tag"),
+          }
         end
       else
-        container_names = [{"name" => "",
-         "rolling_update_test_tag" => "",
-         "rolling_downgrade_test_tag" => "",
-         "rolling_version_change_test_tag" => "",
-         "rollback_from_tag" => "",
-         }]
+        container_names = [{"name"                            => "",
+                            "rolling_update_test_tag"         => "",
+                            "rolling_downgrade_test_tag"      => "",
+                            "rolling_version_change_test_tag" => "",
+                            "rollback_from_tag"               => "",
+        }]
       end
 
-      new({ destination_cnf_dir: destination_cnf_dir,
-                               source_cnf_file: source_cnf_file,
-                               source_cnf_dir: source_cnf_dir,
-                               yml_file_path: yml_file_path,
-                               install_method: install_method,
-                               manifest_directory: manifest_directory,
-                               helm_directory: helm_directory, 
-                               helm_chart_path: helm_chart_path, 
-                               manifest_file_path: manifest_file_path,
-                               git_clone_url: git_clone_url,
-                               install_script: install_script,
-                               release_name: release_name,
-                               service_name: service_name,
-                               docker_repository: docker_repository,
-                               helm_repository: {name: helm_repo_name, repo_url: helm_repo_url},
-                               helm_chart: helm_chart,
-                               helm_chart_container_name: "",
-                               rolling_update_tag: "",
-                               container_names: container_names,
-                               white_list_container_names: white_list_container_names })
-
+      new({destination_cnf_dir:        destination_cnf_dir,
+           source_cnf_file:            source_cnf_file,
+           source_cnf_dir:             source_cnf_dir,
+           yml_file_path:              yml_file_path,
+           install_method:             install_method,
+           manifest_directory:         manifest_directory,
+           helm_directory:             helm_directory,
+           helm_chart_path:            helm_chart_path,
+           manifest_file_path:         manifest_file_path,
+           git_clone_url:              git_clone_url,
+           install_script:             install_script,
+           release_name:               release_name,
+           service_name:               service_name,
+           docker_repository:          docker_repository,
+           helm_repository:            {name: helm_repo_name, repo_url: helm_repo_url},
+           helm_chart:                 helm_chart,
+           helm_chart_container_name:  "",
+           rolling_update_tag:         "",
+           container_names:            container_names,
+           white_list_container_names: white_list_container_names})
     end
   end
 end

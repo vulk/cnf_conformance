@@ -22,17 +22,16 @@ task "helm_deploy" do |_, args|
   LOGGING.info("helm_deploy args: #{args.inspect}")
   if check_cnf_config(args) || CNFManager.destination_cnfs_exist?
     CNFManager::Task.task_runner(args) do |args, config|
-      
-      emoji_helm_deploy="⎈🚀"
+      emoji_helm_deploy = "⎈🚀"
       helm_chart = config.cnf_config[:helm_chart]
       helm_directory = config.cnf_config[:helm_directory]
       release_name = config.cnf_config[:release_name]
       yml_file_path = config.cnf_config[:yml_file_path]
       configmap = KubectlClient::Get.configmap("cnf-testsuite-#{release_name}-startup-information")
-      #TODO check if json is empty
+      # TODO check if json is empty
       helm_used = configmap["data"].as_h["helm_used"].as_s
 
-      if helm_used == "true" 
+      if helm_used == "true"
         upsert_passed_task("helm_deploy", "✔️  PASSED: Helm deploy successful #{emoji_helm_deploy}")
       else
         upsert_failed_task("helm_deploy", "✖️  FAILED: Helm deploy failed #{emoji_helm_deploy}")
@@ -47,8 +46,8 @@ desc "Does the install script use helm?"
 task "install_script_helm" do |_, args|
   CNFManager::Task.task_runner(args) do |args, config|
     # config = CNFManager.parsed_config_file(CNFManager.ensure_cnf_testsuite_yml_path(args.named["cnf-config"].as(String)))
-    
-    emoji_helm_script="⎈📦"
+
+    emoji_helm_script = "⎈📦"
     found = 0
     # destination_cnf_dir = CNFManager.cnf_destination_dir(CNFManager.ensure_cnf_testsuite_dir(args.named["cnf-config"].as(String)))
     # install_script = config.get("install_script").as_s?
@@ -87,7 +86,7 @@ task "helm_chart_published", ["helm_local_install"] do |_, args|
     # config = CNFManager.parsed_config_file(CNFManager.ensure_cnf_testsuite_yml_path(args.named["cnf-config"].as(String)))
     # helm_chart = "#{config.get("helm_chart").as_s?}"
     helm_chart = config.cnf_config[:helm_chart]
-    emoji_published_helm_chart="⎈📦🌐"
+    emoji_published_helm_chart = "⎈📦🌐"
     current_dir = FileUtils.pwd
     helm = CNFSingleton.helm
     VERBOSE_LOGGING.debug helm if check_verbose(args)
@@ -137,7 +136,7 @@ task "helm_chart_valid", ["helm_local_install"] do |_, args|
     current_dir = FileUtils.pwd
     VERBOSE_LOGGING.debug current_dir if check_verbose(args)
     helm = CNFSingleton.helm
-    emoji_helm_lint="⎈📝☑️"
+    emoji_helm_lint = "⎈📝☑️"
 
     destination_cnf_dir = CNFManager.cnf_destination_dir(CNFManager.ensure_cnf_testsuite_dir(args.named["cnf-config"].as(String)))
 
@@ -155,7 +154,7 @@ end
 task "validate_config" do |_, args|
   yml = CNFManager.parsed_config_file(CNFManager.ensure_cnf_testsuite_yml_path(args.named["cnf-config"].as(String)))
   valid, warning_output = CNFManager.validate_cnf_testsuite_yml(yml)
-  emoji_config="📋"
+  emoji_config = "📋"
   if valid
     stdout_success "✔️ PASSED: CNF configuration validated #{emoji_config}"
   else

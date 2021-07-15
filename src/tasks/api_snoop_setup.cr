@@ -14,4 +14,3 @@ task "install_api_snoop" do |_, args|
     end
   end
 end
-

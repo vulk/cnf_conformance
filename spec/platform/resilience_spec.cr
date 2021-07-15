@@ -20,4 +20,3 @@ describe "Platform" do
     end
   end
 end
-

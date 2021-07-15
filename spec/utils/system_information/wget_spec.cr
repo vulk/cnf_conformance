@@ -13,7 +13,7 @@
 #   end
 
 #   it "'wget_local_response()' should return the information about the wget installation", tags: ["wget"]  do
-#     (wget_local_response(true)).should eq("") 
+#     (wget_local_response(true)).should eq("")
 #   end
 
 #   it "'wget_version()' should return the information about the wget version", tags: ["wget"]  do

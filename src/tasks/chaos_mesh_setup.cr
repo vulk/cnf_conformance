@@ -5,27 +5,26 @@ require "totem"
 require "./utils/utils.cr"
 require "./utils/tar.cr"
 
-CHAOS_MESH_VERSION = "v0.8.0"
+CHAOS_MESH_VERSION     = "v0.8.0"
 CHAOS_MESH_OFFLINE_DIR = "#{TarClient::TAR_REPOSITORY_DIR}/chaos-mesh_chaos-mesh"
 
 desc "Install Chaos Mesh"
 task "install_chaosmesh" do |_, args|
   VERBOSE_LOGGING.info "install_chaosmesh" if check_verbose(args)
-  current_dir = FileUtils.pwd 
-    helm = CNFSingleton.helm
-    # KubectlClient::Apply.file("https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/#{CHAOS_MESH_VERSION}/manifests/crd.yaml")
+  current_dir = FileUtils.pwd
+  helm = CNFSingleton.helm
+  # KubectlClient::Apply.file("https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/#{CHAOS_MESH_VERSION}/manifests/crd.yaml")
 
-    if args.named["offline"]?
-      LOGGING.info "install chaos mesh offline mode"
-      helm_chart = Dir.entries(CHAOS_MESH_OFFLINE_DIR).first
-      Helm.install("my-chaos-mesh #{CHAOS_MESH_OFFLINE_DIR}/#{helm_chart} --version 0.5.1")
-
-    else
-      # `helm repo add chaos-mesh https://charts.chaos-mesh.org`
-      # `helm install my-chaos-mesh chaos-mesh/chaos-mesh --version 0.5.1`
-      Helm.helm_repo_add("chaos-mesh","https://charts.chaos-mesh.org")
-      Helm.install("my-chaos-mesh chaos-mesh/chaos-mesh --version 0.5.1")
-    end
+  if args.named["offline"]?
+    LOGGING.info "install chaos mesh offline mode"
+    helm_chart = Dir.entries(CHAOS_MESH_OFFLINE_DIR).first
+    Helm.install("my-chaos-mesh #{CHAOS_MESH_OFFLINE_DIR}/#{helm_chart} --version 0.5.1")
+  else
+    # `helm repo add chaos-mesh https://charts.chaos-mesh.org`
+    # `helm install my-chaos-mesh chaos-mesh/chaos-mesh --version 0.5.1`
+    Helm.helm_repo_add("chaos-mesh", "https://charts.chaos-mesh.org")
+    Helm.install("my-chaos-mesh chaos-mesh/chaos-mesh --version 0.5.1")
+  end
   # unless Dir.exists?("#{current_dir}/#{TOOLS_DIR}/chaos_mesh")
   #   status = Process.run("git clone https://github.com/chaos-mesh/chaos-mesh.git #{current_dir}/#{TOOLS_DIR}/chaos_mesh  > /dev/null 2>&1",
   #                        shell: true,
@@ -50,15 +49,14 @@ desc "Uninstall Chaos Mesh"
 task "uninstall_chaosmesh" do |_, args|
   VERBOSE_LOGGING.info "uninstall_chaosmesh" if check_verbose(args)
   current_dir = FileUtils.pwd
-    helm = CNFSingleton.helm
+  helm = CNFSingleton.helm
   # crd_delete = `kubectl delete -f https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/#{CHAOS_MESH_VERSION}/manifests/crd.yaml`
   #   KubectlClient::Delete.file("https://raw.githubusercontent.com/chaos-mesh/chaos-mesh/#{CHAOS_MESH_VERSION}/manifests/crd.yaml")
   # FileUtils.rm_rf("#{current_dir}/#{TOOLS_DIR}/chaos_mesh")
-  delete_chaos_mesh = `#{helm} delete my-chaos-mesh > /dev/null 2>&1` 
+  delete_chaos_mesh = `#{helm} delete my-chaos-mesh > /dev/null 2>&1`
 end
 
 module ChaosMeshSetup
-
   def self.wait_for_test(test_type, test_name)
     second_count = 0
     wait_count = 60
@@ -66,20 +64,20 @@ module ChaosMeshSetup
     until (status.empty? != true && status == "Finished") || second_count > wait_count.to_i
       LOGGING.debug "second_count = #{second_count}"
       sleep 1
-      LOGGING.info "kubectl get #{test_type} #{test_name} -o json" 
-      status = Process.run("kubectl get #{test_type} #{test_name} -o json ",  
-                           shell: true,  
-                             output: output = IO::Memory.new,  
-                             error: stderr = IO::Memory.new) 
-      LOGGING.info "KubectlClient.exec output: #{output.to_s}" 
-      LOGGING.info "KubectlClient.exec stderr: #{stderr.to_s}" 
-      get_status = output.to_s 
-      if get_status && !get_status.empty? 
-        status_data = JSON.parse(get_status) 
-      else 
-        status_data = JSON.parse(%({})) 
-      end 
-      LOGGING.info "Status: #{get_status}" 
+      LOGGING.info "kubectl get #{test_type} #{test_name} -o json"
+      status = Process.run("kubectl get #{test_type} #{test_name} -o json ",
+        shell: true,
+        output: output = IO::Memory.new,
+        error: stderr = IO::Memory.new)
+      LOGGING.info "KubectlClient.exec output: #{output.to_s}"
+      LOGGING.info "KubectlClient.exec stderr: #{stderr.to_s}"
+      get_status = output.to_s
+      if get_status && !get_status.empty?
+        status_data = JSON.parse(get_status)
+      else
+        status_data = JSON.parse(%({}))
+      end
+      LOGGING.info "Status: #{get_status}"
       status = status_data.dig?("status", "experiment", "phase").to_s
       second_count = second_count + 1
       LOGGING.info "#{get_status}"

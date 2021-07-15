@@ -12,7 +12,7 @@ describe "Resilience Disk Fill Chaos" do
     $?.success?.should be_true
   end
 
-  it "'disk_fill' A 'Good' CNF should not crash when disk fill occurs", tags: ["disk_fill"]  do
+  it "'disk_fill' A 'Good' CNF should not crash when disk fill occurs", tags: ["disk_fill"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-coredns-cnf/cnf-testsuite.yml wait_count=0`
       $?.success?.should be_true

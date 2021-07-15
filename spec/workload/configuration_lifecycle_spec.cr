@@ -16,7 +16,6 @@ describe CnfTestSuite do
     # $?.success?.should be_true
   end
 
-
   it "'liveness' should pass when livenessProbe is set", tags: ["liveness"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/k8s-multiple-deployments/cnf-testsuite.yml deploy_with_chart=false`
@@ -69,7 +68,7 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rolling_update' should pass when valid version is given", tags: ["rolling_update"]  do
+  it "'rolling_update' should pass when valid version is given", tags: ["rolling_update"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns/cnf-testsuite.yml verbose wait_count=0`
       $?.success?.should be_true
@@ -82,7 +81,7 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rolling_update' should fail when invalid version is given", tags: ["rolling_update"]  do
+  it "'rolling_update' should fail when invalid version is given", tags: ["rolling_update"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns_invalid_version/cnf-testsuite.yml deploy_with_chart=false`
       $?.success?.should be_true
@@ -95,13 +94,13 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rolling_downgrade' should pass when valid version is given", tags: ["rolling_downgrade"]  do
+  it "'rolling_downgrade' should pass when valid version is given", tags: ["rolling_downgrade"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns/cnf-testsuite.yml verbose wait_count=0`
       $?.success?.should be_true
-      retry_limit = 5 
+      retry_limit = 5
       retries = 1
-      response_s = "" 
+      response_s = ""
       until (/Passed/ =~ response_s) || retries > retry_limit
         LOGGING.info "rolling_downgrade retry: #{retries}"
         sleep 1.0
@@ -116,7 +115,7 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rolling_downgrade' should fail when invalid version is given", tags: ["rolling_downgrade"]  do
+  it "'rolling_downgrade' should fail when invalid version is given", tags: ["rolling_downgrade"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns_invalid_version/cnf-testsuite.yml deploy_with_chart=false`
       $?.success?.should be_true
@@ -129,7 +128,7 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rolling_version_change' should pass when valid version is given", tags: ["rolling_version_change"]  do
+  it "'rolling_version_change' should pass when valid version is given", tags: ["rolling_version_change"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns/cnf-testsuite.yml verbose wait_count=0`
       $?.success?.should be_true
@@ -155,7 +154,7 @@ describe CnfTestSuite do
     end
   end
 
-  it "'rollback' should pass ", tags: ["rollback"]  do
+  it "'rollback' should pass ", tags: ["rollback"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-config=./sample-cnfs/sample_coredns/cnf-testsuite.yml verbose wait_count=0`
       $?.success?.should be_true
@@ -341,7 +340,6 @@ describe CnfTestSuite do
       LOGGING.info `./cnf-testsuite cnf_cleanup cnf-config=./sample-cnfs/sample_immutable_configmap_all/cnf-testsuite.yml deploy_with_chart=false`
     end
   end
-
 
   it "'immutable_configmap' should pass with all immutable configmaps with env mounted", tags: ["immutable_configmap_env"] do
     begin

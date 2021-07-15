@@ -16,13 +16,13 @@ describe "CurlInstall" do
       raise "crystal build failed! curl_install_spec.cr"
     end
   end
-  it "'source curl_install.sh' should download a cnf-testsuite binary", tags: ["curl"]  do
+  it "'source curl_install.sh' should download a cnf-testsuite binary", tags: ["curl"] do
     response_s = `/bin/bash -c "source ./curl_install.sh"`
     LOGGING.info response_s
     $?.success?.should be_true
     (/cnf-testsuite/ =~ response_s).should_not be_nil
   end
-  it "'curl_install.sh' should download a cnf-testsuite binary", tags: ["curl"]  do
+  it "'curl_install.sh' should download a cnf-testsuite binary", tags: ["curl"] do
     response_s = `./curl_install.sh`
     LOGGING.info response_s
     $?.success?.should be_true

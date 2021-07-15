@@ -4,7 +4,7 @@ require "../../src/tasks/utils/utils.cr"
 
 describe CnfTestSuite do
   before_all do
-    # LOGGING.debug `pwd` 
+    # LOGGING.debug `pwd`
     # LOGGING.debug `echo $KUBECONFIG`
     `./cnf-testsuite samples_cleanup`
     $?.success?.should be_true
@@ -12,7 +12,7 @@ describe CnfTestSuite do
     # `./cnf-testsuite setup`
     # $?.success?.should be_true
   end
-  it "'privileged' should pass with a non-privileged cnf", tags: ["privileged"]  do
+  it "'privileged' should pass with a non-privileged cnf", tags: ["privileged"] do
     begin
       LOGGING.debug `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-statefulset-cnf/cnf-testsuite.yml`
       response_s = `./cnf-testsuite privileged verbose`

@@ -3,7 +3,7 @@ require "colorize"
 require "totem"
 
 # TODO put this in a module
-def helm_installation(verbose=false)
+def helm_installation(verbose = false)
   gmsg = "No Global helm version found"
   lmsg = "No Local helm version found"
   ghelm = helm_global_response
@@ -26,7 +26,6 @@ def helm_installation(verbose=false)
   if local_helm_version && !local_helm_version.empty?
     lmsg = "Local helm found. Version: #{local_helm_version}"
     stdout_success lmsg
-
   else
     stdout_warning lmsg
   end
@@ -43,29 +42,28 @@ def helm_installation(verbose=false)
   "#{lmsg} #{gmsg}"
 end
 
-def helm_global_response(verbose=false)
+def helm_global_response(verbose = false)
   helm_response = `helm version 2>/dev/null`
   VERBOSE_LOGGING.info helm_response if verbose
   helm_response
 end
 
-def helm_local_response(verbose=false)
+def helm_local_response(verbose = false)
   current_dir = FileUtils.pwd
   VERBOSE_LOGGING.info current_dir if verbose
-  #helm = "#{current_dir}/#{TOOLS_DIR}/helm/linux-amd64/helm"
-    helm = CNFSingleton.helm
+  # helm = "#{current_dir}/#{TOOLS_DIR}/helm/linux-amd64/helm"
+  helm = CNFSingleton.helm
   # helm_response = `#{helm} version`
   status = Process.run("#{helm} version", shell: true, output: helm_response = IO::Memory.new, error: stderr = IO::Memory.new)
   VERBOSE_LOGGING.info helm_response.to_s if verbose
   helm_response.to_s
 end
 
-def helm_version(helm_response, verbose=false)
+def helm_version(helm_response, verbose = false)
   resp = "#{helm_v2_version(helm_response) || helm_v3_version(helm_response)}"
   VERBOSE_LOGGING.info resp if verbose
   resp
 end
-
 
 def helm_v2_version(helm_response)
   # example
@@ -83,10 +81,10 @@ def helm_v3_version(helm_response)
   helm_v3 && helm_v3.not_nil![1]
 end
 
-#TODO Get global response for helm
-#TODO Get version number of global response for helm
-#TODO If version of helm not 3 or greater, act as if helm is not installed
-#TODO If version of helm is 3, return helm installed
+# TODO Get global response for helm
+# TODO Get version number of global response for helm
+# TODO If version of helm not 3 or greater, act as if helm is not installed
+# TODO If version of helm is 3, return helm installed
 
 def global_helm_installed?
   ghelm = helm_global_response

@@ -12,7 +12,7 @@ describe "Resilience Container Chaos" do
     $?.success?.should be_true
   end
 
-  it "'chaos_container_kill' A 'Good' CNF should recover when its container is killed", tags: ["chaos_container_kill"]  do
+  it "'chaos_container_kill' A 'Good' CNF should recover when its container is killed", tags: ["chaos_container_kill"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-coredns-cnf/cnf-testsuite.yml`
       $?.success?.should be_true

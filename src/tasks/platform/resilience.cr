@@ -24,15 +24,13 @@ namespace "platform" do
       current_dir = FileUtils.pwd
       helm = CNFSingleton.helm
 
-      #Select the first node that isn't a master and is also schedulable
+      # Select the first node that isn't a master and is also schedulable
       worker_nodes = `kubectl get nodes --selector='!node-role.kubernetes.io/master' -o 'go-template={{range .items}}{{$taints:=""}}{{range .spec.taints}}{{if eq .effect "NoSchedule"}}{{$taints = print $taints .key ","}}{{end}}{{end}}{{if not $taints}}{{.metadata.name}}{{ "\\n"}}{{end}}{{end}}'`
       worker_node = worker_nodes.split("\n")[0]
-
 
       File.write("node_failure_values.yml", NODE_FAILED_VALUES)
       install_coredns = `#{helm} install node-failure -f ./node_failure_values.yml --set nodeSelector."kubernetes\\.io/hostname"=#{worker_node} stable/coredns`
       KubectlClient::Get.wait_for_install("node-failure-coredns")
-
 
       File.write("reboot_daemon_pod.yml", REBOOT_DAEMON)
       install_reboot_daemon = `kubectl create -f reboot_daemon_pod.yml`
@@ -57,7 +55,7 @@ namespace "platform" do
         reboot_daemon_pod = KubectlClient::Get.pod_status("reboot", "--field-selector spec.nodeName=#{worker_node}").split(",")[0]
         start_reboot = `kubectl exec -ti #{reboot_daemon_pod} touch /tmp/reboot`
 
-        #Watch for Node Failure.
+        # Watch for Node Failure.
         pod_ready = ""
         node_ready = ""
         node_failure_timeout = 30
@@ -75,7 +73,7 @@ namespace "platform" do
           sleep 1
         end
 
-        #Watch for Node to come back online
+        # Watch for Node to come back online
         pod_ready = ""
         node_ready = ""
         node_online_timeout = 300
@@ -93,10 +91,8 @@ namespace "platform" do
           sleep 1
         end
 
-        emoji_worker_reboot_recovery=""
-        resp = upsert_passed_task("worker_reboot_recovery","✔️  PASSED: Node came back online #{emoji_worker_reboot_recovery}")
-
-
+        emoji_worker_reboot_recovery = ""
+        resp = upsert_passed_task("worker_reboot_recovery", "✔️  PASSED: Node came back online #{emoji_worker_reboot_recovery}")
       ensure
         LOGGING.info "node_failure cleanup"
         delete_reboot_daemon = `kubectl delete -f reboot_daemon_pod.yml`

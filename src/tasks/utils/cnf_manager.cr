@@ -14,8 +14,6 @@ require "./tar.cr"
 require "./generate_config.cr"
 
 module CNFManager
-
-
   # TODO: figure out recursively check for unmapped json and warn on that
   # https://github.com/Nicolab/crystal-validator#check
   def self.validate_cnf_testsuite_yml(config)
@@ -37,7 +35,6 @@ module CNFManager
     unmapped_keys_warning_msg = "WARNING: Unmapped cnf_testsuite.yml keys. Please add them to the validator".colorize(:yellow)
     unmapped_subkeys_warning_msg = "WARNING: helm_repository is unset or has unmapped subkeys. Please update your cnf_testsuite.yml".colorize(:yellow)
 
-
     if ccyt_validator && !ccyt_validator.try &.json_unmapped.empty?
       warning_output = [unmapped_keys_warning_msg] of String | Colorize::Object(String)
       warning_output.push(ccyt_validator.try &.json_unmapped.to_s)
@@ -46,7 +43,7 @@ module CNFManager
       end
     end
 
-    #TODO Differentiate between unmapped subkeys or unset top level key.
+    # TODO Differentiate between unmapped subkeys or unset top level key.
     if ccyt_validator && !ccyt_validator.try &.helm_repository.try &.json_unmapped.empty?
       root = {} of String => (Hash(String, JSON::Any) | Nil)
       root["helm_repository"] = ccyt_validator.try &.helm_repository.try &.json_unmapped
@@ -58,9 +55,8 @@ module CNFManager
       end
     end
 
-    { valid, warning_output }
+    {valid, warning_output}
   end
-
 
   # Applies a block to each cnf resource
   #
@@ -81,16 +77,16 @@ module CNFManager
     case install_method[0]
     when :helm_chart, :helm_directory
       Helm.generate_manifest_from_templates(release_name,
-                                            helm_chart_path,
-                                            manifest_file_path)
+        helm_chart_path,
+        manifest_file_path)
       template_ymls = Helm::Manifest.parse_manifest_as_ymls(manifest_file_path)
     when :manifest_directory
-    # if release_name.empty? # no helm chart
-      template_ymls = Helm::Manifest.manifest_ymls_from_file_list(Helm::Manifest.manifest_file_list( destination_cnf_dir + "/" + manifest_directory))
-    # else
+      # if release_name.empty? # no helm chart
+      template_ymls = Helm::Manifest.manifest_ymls_from_file_list(Helm::Manifest.manifest_file_list(destination_cnf_dir + "/" + manifest_directory))
+      # else
     end
     resource_ymls = Helm.all_workload_resources(template_ymls)
-		resource_resp = resource_ymls.map do | resource |
+    resource_resp = resource_ymls.map do |resource|
       resp = yield resource
       LOGGING.debug "cnf_workload_resource yield resp: #{resp}"
       resp
@@ -99,13 +95,12 @@ module CNFManager
     resource_resp
   end
 
-  #test_passes_completely = workload_resource_test do | cnf_config, resource, container, initialized |
+  # test_passes_completely = workload_resource_test do | cnf_config, resource, container, initialized |
   def self.workload_resource_test(args, config,
                                   check_containers = true,
                                   check_service = false,
-                                  &block  : (NamedTuple(kind: YAML::Any, name: YAML::Any),
-                                             JSON::Any, JSON::Any, Bool | Nil) -> Bool | Nil)
-            # resp = yield resource, container, volumes, initialized
+                                  &block : (NamedTuple(kind: YAML::Any, name: YAML::Any), JSON::Any, JSON::Any, Bool | Nil) -> Bool | Nil)
+    # resp = yield resource, container, volumes, initialized
     test_passed = true
     resource_ymls = cnf_workload_resources(args, config) do |resource|
       resource
@@ -118,9 +113,9 @@ module CNFManager
       LOGGING.error "no resource names found"
       initialized = false
     end
-		resource_names.each do | resource |
-			VERBOSE_LOGGING.debug resource.inspect if check_verbose(args)
-			volumes = KubectlClient::Get.resource_volumes(resource[:kind].as_s, resource[:name].as_s)
+    resource_names.each do |resource|
+      VERBOSE_LOGGING.debug resource.inspect if check_verbose(args)
+      volumes = KubectlClient::Get.resource_volumes(resource[:kind].as_s, resource[:name].as_s)
       VERBOSE_LOGGING.debug "check_service: #{check_service}" if check_verbose(args)
       VERBOSE_LOGGING.debug "check_containers: #{check_containers}" if check_verbose(args)
       case resource[:kind].as_s.downcase
@@ -133,22 +128,22 @@ module CNFManager
           test_passed = false if resp == false
         end
       else
-				containers = KubectlClient::Get.resource_containers(resource[:kind].as_s, resource[:name].as_s)
-				if check_containers
-					containers.as_a.each do |container|
-						resp = yield resource, container, volumes, initialized
-						LOGGING.debug "yield resp: #{resp}"
-						# if any response is false, the test fails
-						test_passed = false if resp == false
-					end
-				else
-					resp = yield resource, containers, volumes, initialized
-					LOGGING.debug "yield resp: #{resp}"
-					# if any response is false, the test fails
-					test_passed = false if resp == false
-				end
+        containers = KubectlClient::Get.resource_containers(resource[:kind].as_s, resource[:name].as_s)
+        if check_containers
+          containers.as_a.each do |container|
+            resp = yield resource, container, volumes, initialized
+            LOGGING.debug "yield resp: #{resp}"
+            # if any response is false, the test fails
+            test_passed = false if resp == false
+          end
+        else
+          resp = yield resource, containers, volumes, initialized
+          LOGGING.debug "yield resp: #{resp}"
+          # if any response is false, the test fails
+          test_passed = false if resp == false
+        end
       end
-		end
+    end
     LOGGING.debug "workload resource test intialized: #{initialized} test_passed: #{test_passed}"
     initialized && test_passed
   end
@@ -156,19 +151,19 @@ module CNFManager
   def self.cnf_installed?
     LOGGING.info("cnf_config_list")
     LOGGING.info("find: find #{CNF_DIR}/* -name #{CONFIG_FILE}")
-    cnf_testsuite = `find #{CNF_DIR}/* -name "#{CONFIG_FILE}"`.split("\n").select{|x| x.empty? == false}
+    cnf_testsuite = `find #{CNF_DIR}/* -name "#{CONFIG_FILE}"`.split("\n").select { |x| x.empty? == false }
     LOGGING.info("find response: #{cnf_testsuite}")
-    if cnf_testsuite.size == 0 
+    if cnf_testsuite.size == 0
       false
-    else 
+    else
       true
     end
   end
 
-  def self.cnf_config_list(silent=false)
+  def self.cnf_config_list(silent = false)
     LOGGING.info("cnf_config_list")
     LOGGING.info("find: find #{CNF_DIR}/* -name #{CONFIG_FILE}")
-    cnf_testsuite = `find #{CNF_DIR}/* -name "#{CONFIG_FILE}"`.split("\n").select{|x| x.empty? == false}
+    cnf_testsuite = `find #{CNF_DIR}/* -name "#{CONFIG_FILE}"`.split("\n").select { |x| x.empty? == false }
     LOGGING.info("find response: #{cnf_testsuite}")
     if cnf_testsuite.size == 0 && !silent
       raise "No cnf_testsuite.yml found! Did you run the setup task?"
@@ -177,7 +172,7 @@ module CNFManager
   end
 
   def self.destination_cnfs_exist?
-    cnf_config_list(silent=true).size > 0
+    cnf_config_list(silent = true).size > 0
   end
 
   def self.parsed_config_file(path)
@@ -271,7 +266,7 @@ module CNFManager
     end
   end
 
-  def self.install_method_by_config_src(config_src : String, airgapped=false, generate_tar_mode=false)
+  def self.install_method_by_config_src(config_src : String, airgapped = false, generate_tar_mode = false)
     LOGGING.info "install_method_by_config_src"
     LOGGING.info "config_src: #{config_src}"
     helm_chart_file = "#{config_src}/#{CHART_YAML}"
@@ -279,14 +274,14 @@ module CNFManager
     ls_al = `ls -alR config_src #{config_src}`
     ls_al = `ls -alR helm_chart_file #{helm_chart_file}`
 
-    if !Dir.exists?(config_src) 
+    if !Dir.exists?(config_src)
       LOGGING.info "install_method_by_config_src helm_chart selected"
       :helm_chart
     elsif File.exists?(helm_chart_file)
       LOGGING.info "install_method_by_config_src helm_directory selected"
       :helm_directory
-    # elsif generate_tar_mode && KubectlClient::Apply.validate(config_src) # just because we are in generate tar mode doesn't mean we have a K8s cluster
-    elsif Dir.exists?(config_src) 
+      # elsif generate_tar_mode && KubectlClient::Apply.validate(config_src) # just because we are in generate tar mode doesn't mean we have a K8s cluster
+    elsif Dir.exists?(config_src)
       LOGGING.info "install_method_by_config_src manifest_directory selected"
       :manifest_directory
     else
@@ -303,7 +298,7 @@ module CNFManager
     cnf_installation_method(parsed_config_file)
   end
 
-  #Determine, for cnf, whether a helm chart, helm directory, or manifest directory is being used for installation
+  # Determine, for cnf, whether a helm chart, helm directory, or manifest directory is being used for installation
   def self.cnf_installation_method(config : Totem::Config)
     LOGGING.info "cnf_installation_method"
     LOGGING.info "cnf_installation_method config: #{config}"
@@ -317,7 +312,7 @@ module CNFManager
     LOGGING.info "release_name: #{release_name}"
     LOGGING.info "helm_directory: #{helm_directory}"
     LOGGING.info "manifest_directory: #{manifest_directory}"
-    if Dir.exists?(helm_directory) 
+    if Dir.exists?(helm_directory)
       LOGGING.info "Change helm_directory relative path into full path"
       full_helm_directory = Path[helm_directory].expand.to_s
     elsif Dir.exists?(manifest_directory)
@@ -351,18 +346,18 @@ module CNFManager
     end
   end
 
-  #TODO move to helm module
-  def self.helm_template_header(helm_chart_or_directory : String, template_file="/tmp/temp_template.yml", airgapped=false)
+  # TODO move to helm module
+  def self.helm_template_header(helm_chart_or_directory : String, template_file = "/tmp/temp_template.yml", airgapped = false)
     LOGGING.info "helm_template_header"
     LOGGING.info "helm_template_header helm_chart_or_directory: #{helm_chart_or_directory}"
     helm = CNFSingleton.helm
     # generate helm chart release name
     # use --dry-run to generate yml file
-    LOGGING.info  "airgapped mode: #{airgapped}"
+    LOGGING.info "airgapped mode: #{airgapped}"
     if airgapped
       # todo make tar info work with a directory
       info = AirGapUtils.tar_info_by_config_src(helm_chart_or_directory)
-      LOGGING.info  "airgapped mode info: #{info}"
+      LOGGING.info "airgapped mode info: #{info}"
       helm_chart_or_directory = info[:tar_name]
     end
     # LOGGING.info("#{helm} install --dry-run --generate-name #{helm_chart_or_directory} > #{template_file}")
@@ -377,22 +372,21 @@ module CNFManager
     parsed_template_header
   end
 
-  #TODO move to helm module
-  def self.helm_chart_template_release_name(helm_chart_or_directory : String, template_file="/tmp/temp_template.yml", airgapped=false)
+  # TODO move to helm module
+  def self.helm_chart_template_release_name(helm_chart_or_directory : String, template_file = "/tmp/temp_template.yml", airgapped = false)
     LOGGING.info "helm_chart_template_release_name"
-    LOGGING.info  "airgapped mode: #{airgapped}"
+    LOGGING.info "airgapped mode: #{airgapped}"
     LOGGING.info "helm_chart_template_release_name helm_chart_or_directory: #{helm_chart_or_directory}"
     hth = helm_template_header(helm_chart_or_directory, template_file, airgapped)
     LOGGING.info "helm template (should not be a full path): #{hth}"
     hth["NAME"]
   end
 
-
-  def self.generate_and_set_release_name(config_yml_path, airgapped=false, generate_tar_mode=false)
+  def self.generate_and_set_release_name(config_yml_path, airgapped = false, generate_tar_mode = false)
     LOGGING.info "generate_and_set_release_name"
     LOGGING.info "generate_and_set_release_name config_yml_path: #{config_yml_path}"
-    LOGGING.info  "airgapped mode: #{airgapped}"
-    LOGGING.info  "generate_tar_mode: #{generate_tar_mode}"
+    LOGGING.info "airgapped mode: #{airgapped}"
+    LOGGING.info "generate_tar_mode: #{generate_tar_mode}"
     return if generate_tar_mode
 
     yml_file = CNFManager.ensure_cnf_testsuite_yml_path(config_yml_path)
@@ -423,12 +417,11 @@ module CNFManager
       else
         raise "Install method should be either helm_chart, helm_directory, or manifest_directory"
       end
-      #set generated helm chart release name in yml file
+      # set generated helm chart release name in yml file
       LOGGING.debug "generate_and_set_release_name: #{release_name}"
       update_yml(yml_file, "release_name", release_name)
     end
   end
-
 
   # TODO move to sandbox module
   def self.cnf_destination_dir(config_file)
@@ -455,7 +448,7 @@ module CNFManager
     end
   end
 
-  def self.helm_repo_add(helm_repo_name=nil, helm_repo_url=nil, args : Sam::Args=Sam::Args.new)
+  def self.helm_repo_add(helm_repo_name = nil, helm_repo_url = nil, args : Sam::Args = Sam::Args.new)
     LOGGING.info "helm_repo_add repo_name: #{helm_repo_name} repo_url: #{helm_repo_url} args: #{args.inspect}"
     ret = false
     if helm_repo_name == nil || helm_repo_url == nil
@@ -480,7 +473,7 @@ module CNFManager
     ret
   end
 
-  def self.sample_setup_cli_args(args, noisy=true)
+  def self.sample_setup_cli_args(args, noisy = true)
     VERBOSE_LOGGING.info "sample_setup_cli_args" if check_verbose(args)
     VERBOSE_LOGGING.debug "args = #{args.inspect}" if check_verbose(args)
     cnf_path = ""
@@ -507,8 +500,8 @@ module CNFManager
     input_file = args.named["offline"].as(String) if args.named["offline"]?
     input_file = args.named["input-file"].as(String) if args.named["input-file"]?
     input_file = args.named["if"].as(String) if args.named["if"]?
-    airgapped=false
-    airgapped=true if args.raw.includes?("airgapped")
+    airgapped = false
+    airgapped = true if args.raw.includes?("airgapped")
 
     cli_args = {config_file: cnf_path, wait_count: wait_count, verbose: check_verbose(args), output_file: output_file, input_file: input_file}
     LOGGING.debug "cli_args: #{cli_args}"
@@ -529,7 +522,6 @@ module CNFManager
     manifest_directory = config.cnf_config[:manifest_directory]
     helm_chart_path = config.cnf_config[:helm_chart_path]
     destination_cnf_dir = CNFManager.cnf_destination_dir(config_file)
-
 
     # todo manifest_or_helm_directory should either be the source helm/manifest files or the destination
     # directory that they will be copied to/generated into, but *not both*
@@ -568,18 +560,18 @@ module CNFManager
     helm_chart = config.cnf_config[:helm_chart]
     destination_cnf_dir = CNFManager.cnf_destination_dir(config_file)
 
-    #TODO don't think we need to make this here
+    # TODO don't think we need to make this here
     FileUtils.mkdir_p("#{destination_cnf_dir}/#{helm_directory}")
 
     input_file = cli_args[:input_file]
     output_file = cli_args[:output_file]
     if input_file && !input_file.empty?
       # todo add generate and set tar as well
-      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), airgapped: true) 
+      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), airgapped: true)
       tar_info = AirGapUtils.tar_info_by_config_src(helm_chart)
       tgz_name = tar_info[:tar_name]
     elsif output_file && !output_file.empty?
-      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), generate_tar_mode: true) 
+      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), generate_tar_mode: true)
       tgz_name = "#{Helm.chart_name(helm_chart)}-*.tgz"
     else
       config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file))
@@ -588,26 +580,25 @@ module CNFManager
     LOGGING.info "tgz_name: #{tgz_name}"
 
     unless input_file && !input_file.empty?
-      helm_info = Helm.pull(helm_chart) 
+      helm_info = Helm.pull(helm_chart)
       puts "Helm pull error".colorize(:red)
-      raise "Helm pull error" unless helm_info[:status].success? 
+      raise "Helm pull error" unless helm_info[:status].success?
     end
 
-    TarClient.untar(tgz_name,  "#{destination_cnf_dir}/exported_chart")
+    TarClient.untar(tgz_name, "#{destination_cnf_dir}/exported_chart")
 
     VERBOSE_LOGGING.info "mv #{destination_cnf_dir}/exported_chart/#{Helm.chart_name(helm_chart)}/* #{destination_cnf_dir}/exported_chart" if verbose
     LOGGING.info "ls -alR (before move) destination_cnf_dir:"
-    LOGGING.info  `ls -alR #{destination_cnf_dir}`
+    LOGGING.info `ls -alR #{destination_cnf_dir}`
     move_chart = `mv #{destination_cnf_dir}/exported_chart/#{Helm.chart_name(helm_chart)}/* #{destination_cnf_dir}/exported_chart`
 
     LOGGING.info "ls -alR (after move) destination_cnf_dir:"
     LOGGING.info `ls -alR #{destination_cnf_dir}`
-
   end
 
-  #sample_setup({config_file: cnf_path, wait_count: wait_count})
+  # sample_setup({config_file: cnf_path, wait_count: wait_count})
   def self.sample_setup(cli_args)
-    #TODO accept offline mode
+    # TODO accept offline mode
     LOGGING.info "sample_setup cli_args: #{cli_args}"
     config_file = cli_args[:config_file]
     wait_count = cli_args[:wait_count]
@@ -616,9 +607,9 @@ module CNFManager
     output_file = cli_args[:output_file]
     if input_file && !input_file.empty?
       # todo add generate and set tar as well
-      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), airgapped: true) 
+      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), airgapped: true)
     elsif output_file && !output_file.empty?
-      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), generate_tar_mode: true) 
+      config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file), generate_tar_mode: true)
     else
       config = CNFManager::Config.parse_config_yml(CNFManager.ensure_cnf_testsuite_yml_path(config_file))
     end
@@ -650,7 +641,7 @@ module CNFManager
     LOGGING.debug "mkdir_p destination_cnf_dir: #{destination_cnf_dir}"
     FileUtils.mkdir_p(destination_cnf_dir)
 
-    GitClient.clone("#{git_clone_url} #{destination_cnf_dir}/#{release_name}")  if git_clone_url.empty? == false
+    GitClient.clone("#{git_clone_url} #{destination_cnf_dir}/#{release_name}") if git_clone_url.empty? == false
 
     sandbox_setup(config, cli_args)
 
@@ -663,13 +654,13 @@ module CNFManager
       when :manifest_directory
         # todo airgap_manifest_directory << prepare a manifest directory for deployment into an airgapped environment, put in airgap module
         if input_file && !input_file.empty?
-          yaml_template_files = Find.find("#{destination_cnf_dir}/#{manifest_directory}", 
-                                               "*.yaml*", "100")
-          yml_template_files = Find.find("#{destination_cnf_dir}/#{manifest_directory}", 
-                                               "*.yml*", "100")
+          yaml_template_files = Find.find("#{destination_cnf_dir}/#{manifest_directory}",
+            "*.yaml*", "100")
+          yml_template_files = Find.find("#{destination_cnf_dir}/#{manifest_directory}",
+            "*.yml*", "100")
           template_files = yaml_template_files + yml_template_files
           LOGGING.info "(before kubectl apply) calling image_pull_policy on #{template_files}"
-          template_files.map{|x| AirGapUtils.image_pull_policy(x)}
+          template_files.map { |x| AirGapUtils.image_pull_policy(x) }
         end
         VERBOSE_LOGGING.info "deploying by manifest file" if verbose
         KubectlClient::Apply.file("#{destination_cnf_dir}/#{manifest_directory}")
@@ -677,9 +668,9 @@ module CNFManager
         if input_file && !input_file.empty?
           tar_info = AirGapUtils.tar_info_by_config_src(config.cnf_config[:helm_chart])
           # prepare a helm_chart tar file for deployment into an airgapped environment, put in airgap module
-          TarClient.modify_tar!(tar_info[:tar_name]) do |directory| 
+          TarClient.modify_tar!(tar_info[:tar_name]) do |directory|
             template_files = Find.find(directory, "*.yaml*", "100")
-            template_files.map{|x| AirGapUtils.image_pull_policy(x)}
+            template_files.map { |x| AirGapUtils.image_pull_policy(x) }
           end
           # if in airgapped mode, set helm_chart in config to be the tarball path
           helm_chart = tar_info[:tar_name]
@@ -696,12 +687,12 @@ module CNFManager
         VERBOSE_LOGGING.info "deploying with helm directory" if verbose
         # prepare a helm directory for deployment into an airgapped environment, put in airgap module
         if input_file && !input_file.empty?
-          template_files = Find.find("#{destination_cnf_dir}/#{helm_directory}", 
-                                          "*.yaml*", "100")
-          template_files.map{|x| AirGapUtils.image_pull_policy(x)}
+          template_files = Find.find("#{destination_cnf_dir}/#{helm_directory}",
+            "*.yaml*", "100")
+          template_files.map { |x| AirGapUtils.image_pull_policy(x) }
         end
-        #TODO Add helm options into cnf-testsuite yml
-        #e.g. helm install nsm --set insecure=true ./nsm/helm_chart
+        # TODO Add helm options into cnf-testsuite yml
+        # e.g. helm install nsm --set insecure=true ./nsm/helm_chart
         helm_install = Helm.install("#{release_name} #{destination_cnf_dir}/#{helm_directory}")
       else
         raise "Deployment method not found"
@@ -711,8 +702,8 @@ module CNFManager
         resource
       end
       resource_names = Helm.workload_resource_kind_names(resource_ymls)
-      #TODO move to kubectlclient and make resource_install_and_wait_for_all function
-      resource_names.each do | resource |
+      # TODO move to kubectlclient and make resource_install_and_wait_for_all function
+      resource_names.each do |resource|
         case resource[:kind].as_s.downcase
         when "replicaset", "deployment", "statefulset", "pod", "daemonset"
           KubectlClient::Get.resource_wait_for_install(resource[:kind].as_s, resource[:name].as_s, wait_count)
@@ -730,29 +721,28 @@ module CNFManager
       stdout_success "Successfully setup #{release_name}"
     end
 
-
     if version_less_than(KubectlClient.server_version, "1.19.0")
       k8s_ver = false
     else
-      k8s_ver = true 
+      k8s_ver = true
     end
 
-    # TODO save to an [preferrably immutable] config map 
-    #TODO if helm_install then set helm_deploy = true in template
+    # TODO save to an [preferrably immutable] config map
+    # TODO if helm_install then set helm_deploy = true in template
     LOGGING.info "save config"
-    elapsed_time_template = Crinja.render(configmap_temp, { "helm_install" => helm_used, "release_name" => "cnf-testsuite-#{release_name}-startup-information", "elapsed_time" => "#{elapsed_time.seconds}", "k8s_ver" => "#{k8s_ver}"})
-    #TODO find a way to kubectlapply directly without a map
+    elapsed_time_template = Crinja.render(configmap_temp, {"helm_install" => helm_used, "release_name" => "cnf-testsuite-#{release_name}-startup-information", "elapsed_time" => "#{elapsed_time.seconds}", "k8s_ver" => "#{k8s_ver}"})
+    # TODO find a way to kubectlapply directly without a map
     LOGGING.debug "elapsed_time_template : #{elapsed_time_template}"
-    write_template= `echo "#{elapsed_time_template}" > "#{destination_cnf_dir}/configmap_test.yml"`
+    write_template = `echo "#{elapsed_time_template}" > "#{destination_cnf_dir}/configmap_test.yml"`
     # TODO if the config map exists on install, complain, delete then overwrite?
     KubectlClient::Delete.file("#{destination_cnf_dir}/configmap_test.yml")
-    #TODO call kubectl apply on file
+    # TODO call kubectl apply on file
     KubectlClient::Apply.file("#{destination_cnf_dir}/configmap_test.yml")
     # TODO when uninstalling, remove config map
   end
 
-def self.configmap_temp
-  <<-TEMPLATE
+  def self.configmap_temp
+    <<-TEMPLATE
   apiVersion: v1
   kind: ConfigMap
   metadata:
@@ -764,10 +754,9 @@ def self.configmap_temp
     startup_time: '{{ elapsed_time }}'
     helm_used: '{{ helm_used }}'
   TEMPLATE
-end
+  end
 
-
-  def self.sample_cleanup(config_file, force=false, installed_from_manifest=false, verbose=true)
+  def self.sample_cleanup(config_file, force = false, installed_from_manifest = false, verbose = true)
     LOGGING.info "sample_cleanup"
     LOGGING.info "sample_cleanup installed_from_manifest: #{installed_from_manifest}"
     destination_cnf_dir = CNFManager.cnf_destination_dir(config_file)
@@ -801,7 +790,7 @@ end
         end
       else
         LOGGING.info "helm uninstall command: #{helm} uninstall #{release_name.split(" ")[0]}"
-        #TODO add capability to add helm options for uninstall
+        # TODO add capability to add helm options for uninstall
         helm_uninstall = `#{helm} uninstall #{release_name.split(" ")[0]}`
         ret = $?.success?
         VERBOSE_LOGGING.info helm_uninstall if verbose
@@ -814,5 +803,4 @@ end
     end
     ret
   end
-
 end

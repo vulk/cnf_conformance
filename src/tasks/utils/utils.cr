@@ -40,7 +40,6 @@ end
 Log.setup(Log::Severity::Error, Log::IOBackend.new(formatter: log_formatter))
 Log.setup(loglevel, Log::IOBackend.new(formatter: log_formatter))
 
-
 def loglevel
   levelstr = "" # default to unset
 
@@ -125,9 +124,8 @@ class VerboseLogginGenerator
   end
 end
 
-LOGGING = LogginGenerator.new
+LOGGING         = LogginGenerator.new
 VERBOSE_LOGGING = VerboseLogginGenerator.new
-
 
 def check_verbose(args)
   ((args.raw.includes? "verbose") || (args.raw.includes? "v"))
@@ -142,7 +140,7 @@ def check_cnf_config(args)
     VERBOSE_LOGGING.info "all cnf: #{cnf}" if check_verbose(args)
   else
     cnf = nil
-	end
+  end
   LOGGING.info("check_cnf_config cnf: #{cnf}")
   cnf
 end
@@ -163,8 +161,8 @@ def toggle(toggle_name)
   toggle_on
 end
 
-## check feature level e.g. --beta
-## if no feature level then feature level = ga
+# # check feature level e.g. --beta
+# # if no feature level then feature level = ga
 def check_feature_level(args)
   LOGGING.info "args.raw #{args.raw}"
   case args.raw
@@ -212,7 +210,7 @@ end
 
 def check_wip(args)
   toggle("wip") || check_feature_level(args) == "wip" ||
-  toggle("poc") || check_feature_level(args) == "poc"
+    toggle("poc") || check_feature_level(args) == "poc"
 end
 
 def check_poc
@@ -242,30 +240,30 @@ def update_yml(yml_file, top_level_key, value)
   parsed_new_yml = YAML.parse(new_yaml)
   LOGGING.debug "update_yml parsed_new_yml: #{parsed_new_yml}"
   File.open("#{yml_file}", "w") do |f|
-    YAML.dump(parsed_new_yml,f)
+    YAML.dump(parsed_new_yml, f)
   end
 end
 
 def upsert_failed_task(task, message)
- CNFManager::Points.upsert_task(task, FAILED, CNFManager::Points.task_points(task, false))
+  CNFManager::Points.upsert_task(task, FAILED, CNFManager::Points.task_points(task, false))
   stdout_failure message
   message
 end
 
 def upsert_passed_task(task, message)
- CNFManager::Points.upsert_task(task, PASSED, CNFManager::Points.task_points(task))
+  CNFManager::Points.upsert_task(task, PASSED, CNFManager::Points.task_points(task))
   stdout_success message
   message
 end
 
 def upsert_skipped_task(task, message)
- CNFManager::Points.upsert_task(task, SKIPPED, CNFManager::Points.task_points(task, CNFManager::Points::Results::ResultStatus::Skipped))
+  CNFManager::Points.upsert_task(task, SKIPPED, CNFManager::Points.task_points(task, CNFManager::Points::Results::ResultStatus::Skipped))
   stdout_warning message
   message
 end
 
 def upsert_na_task(task, message)
- CNFManager::Points.upsert_task(task, NA, CNFManager::Points.task_points(task, CNFManager::Points::Results::ResultStatus::NA))
+  CNFManager::Points.upsert_task(task, NA, CNFManager::Points.task_points(task, CNFManager::Points::Results::ResultStatus::NA))
   stdout_warning message
   message
 end
@@ -290,8 +288,8 @@ def stdout_score(test_name)
   total = CNFManager::Points.total_points(test_name)
   pretty_test_name = test_name.split(/:|_/).map(&.capitalize).join(" ")
   # test_log_msg = "#{pretty_test_name} final score: #{total} of #{CNFManager::Points.total_max_points(test_name)}"
-  test_log_msg = 
-<<-STRING
+  test_log_msg =
+    <<-STRING
 #{pretty_test_name} final score: #{total} of #{CNFManager::Points.total_max_points(test_name)}
 
 STRING

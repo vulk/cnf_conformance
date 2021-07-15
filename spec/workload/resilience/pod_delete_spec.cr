@@ -12,7 +12,7 @@ describe "Resilience pod delete Chaos" do
     $?.success?.should be_true
   end
 
-  it "'pod_delete' A 'Good' CNF should not crash when pod delete occurs", tags: ["pod_delete"]  do
+  it "'pod_delete' A 'Good' CNF should not crash when pod delete occurs", tags: ["pod_delete"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-coredns-cnf/cnf-testsuite.yml`
       $?.success?.should be_true

@@ -23,11 +23,11 @@ namespace "platform" do
         end
       end
       LOGGING.info "all_oci_runtimes: #{all_oci_runtimes}"
-      if all_oci_runtimes 
-        emoji_chaos_oci_compliant="📶☠️"
-        upsert_passed_task("oci_compliant","✔️  PASSED: Your platform is using the following runtimes: [#{KubectlClient::Get.container_runtimes.join(",")}] which are OCI compliant runtimes #{emoji_chaos_oci_compliant}")
+      if all_oci_runtimes
+        emoji_chaos_oci_compliant = "📶☠️"
+        upsert_passed_task("oci_compliant", "✔️  PASSED: Your platform is using the following runtimes: [#{KubectlClient::Get.container_runtimes.join(",")}] which are OCI compliant runtimes #{emoji_chaos_oci_compliant}")
       else
-        emoji_chaos_oci_compliant="📶☠️"
+        emoji_chaos_oci_compliant = "📶☠️"
         upsert_failed_task("oci_compliant", "✖️  FAILED: Platform has at least one node that uses a non OCI compliant runtime #{emoji_chaos_oci_compliant}")
       end
     end

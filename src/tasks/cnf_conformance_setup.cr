@@ -14,4 +14,3 @@ task "cnf_directory_setup" do |_, args|
   FileUtils.mkdir_p("tools")
   stdout_success "Successfully created directories for cnf-testsuite"
 end
-

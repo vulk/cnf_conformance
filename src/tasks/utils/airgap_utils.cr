@@ -1,5 +1,6 @@
 # coding: utf-8
 require "./find.cr"
+
 # To avoid circular dependencies:
 # airgap uses airgaputils
 # airgap uses tar
@@ -8,19 +9,19 @@ require "./find.cr"
 module AirGapUtils
   TAR_REPOSITORY_DIR = "/tmp/repositories"
 
-  def self.image_pull_policy(file, output_file="")
-    input_content = File.read(file) 
-    output_content = input_content.gsub(/(.*imagePullPolicy:)(.*)/,"\\1 Never")
+  def self.image_pull_policy(file, output_file = "")
+    input_content = File.read(file)
+    output_content = input_content.gsub(/(.*imagePullPolicy:)(.*)/, "\\1 Never")
 
     # LOGGING.debug "pull policy found?: #{input_content =~ /(.*imagePullPolicy:)(.*)/}"
     # LOGGING.debug "output_content: #{output_content}"
     if output_file.empty?
-      input_content = File.write(file, output_content) 
+      input_content = File.write(file, output_content)
     else
-      input_content = File.write(output_file, output_content) 
+      input_content = File.write(output_file, output_content)
     end
     #
-    #TODO find out why this doesn't work
+    # TODO find out why this doesn't work
     # LOGGING.debug "after conversion: #{File.read(file)}"
   end
 
@@ -43,10 +44,10 @@ module AirGapUtils
     repo = config_src.split(" ")[0]
     repo_dir = repo.gsub("/", "_")
     chart_name = repo.split("/")[-1]
-    repo_path = "repositories/#{repo_dir}" 
+    repo_path = "repositories/#{repo_dir}"
     tar_dir = "/tmp/#{repo_path}"
     tar_info = {repo: repo, repo_dir: repo_dir, chart_name: chart_name,
-     repo_path: repo_path, tar_dir: tar_dir, tar_name: tar_name_by_helm_chart(config_src)}
+                repo_path: repo_path, tar_dir: tar_dir, tar_name: tar_name_by_helm_chart(config_src)}
     LOGGING.info "tar_info: #{tar_info}"
     tar_info
   end
@@ -58,11 +59,9 @@ module AirGapUtils
     repo = config_src.split(" ")[0]
     repo_dir = repo.gsub("/", "_")
     chart_name = repo.split("/")[-1]
-    repo_path = "repositories/#{repo_dir}" 
+    repo_path = "repositories/#{repo_dir}"
     tar_dir = "/tmp/#{repo_path}"
     LOGGING.info "helm_tar_dir: #{tar_dir}"
     tar_dir
   end
-
-
 end

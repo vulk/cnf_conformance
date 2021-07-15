@@ -2,14 +2,14 @@ require "file_utils"
 require "colorize"
 require "totem"
 
-def clusterctl_installation(verbose=false)
+def clusterctl_installation(verbose = false)
   gmsg = "No Global clusterctl version found"
   lmsg = "No Local clusterctl version found"
   gclusterctl = clusterctl_global_response(verbose)
   VERBOSE_LOGGING.info gclusterctl if verbose
-  
+
   global_clusterctl_version = clusterctl_version(gclusterctl, verbose)
-   
+
   if !global_clusterctl_version.empty?
     gmsg = "Global clusterctl found. Version: #{global_clusterctl_version}"
     stdout_success gmsg
@@ -19,9 +19,9 @@ def clusterctl_installation(verbose=false)
 
   lclusterctl = clusterctl_local_response(verbose)
   VERBOSE_LOGGING.info lclusterctl if verbose
-  
+
   local_clusterctl_version = clusterctl_version(lclusterctl, verbose)
-   
+
   if !local_clusterctl_version.empty?
     lmsg = "Local clusterctl found. Version: #{local_clusterctl_version}"
     stdout_success lmsg
@@ -37,7 +37,7 @@ def clusterctl_installation(verbose=false)
   if global_clusterctl_version.empty? && local_clusterctl_version.empty?
     stdout_failure "clusterctl not found"
     stdout_failure %Q(
-    Linux installation instructions for clusterctl can be found here: https://cluster-api.sigs.k8s.io/user/quick-start.html#install-clusterctl 
+    Linux installation instructions for clusterctl can be found here: https://cluster-api.sigs.k8s.io/user/quick-start.html#install-clusterctl
 
     Install clusterctl binary with curl on Linux
     Download the latest release with the command:
@@ -56,18 +56,18 @@ def clusterctl_installation(verbose=false)
     )
   end
   "#{lmsg} #{gmsg}"
-end 
+end
 
-def clusterctl_global_response(verbose=false)
+def clusterctl_global_response(verbose = false)
   # i think we can safely ignore  clusterctl version: unable to write version state file: https://github.com/kubernetes-sigs/cluster-api/pull/3575
   clusterctl_response = `clusterctl version`
   VERBOSE_LOGGING.info clusterctl_response if verbose
-  clusterctl_response 
+  clusterctl_response
 end
 
-def clusterctl_local_response(verbose=false)
-  current_dir = FileUtils.pwd 
-  VERBOSE_LOGGING.info current_dir if verbose 
+def clusterctl_local_response(verbose = false)
+  current_dir = FileUtils.pwd
+  VERBOSE_LOGGING.info current_dir if verbose
   clusterctl = "#{current_dir}/#{TOOLS_DIR}/clusterctl/linux-amd64/clusterctl"
   # clusterctl_response = `#{clusterctl} version`
   status = Process.run("#{clusterctl} version", shell: true, output: clusterctl_response = IO::Memory.new, error: stderr = IO::Memory.new)
@@ -76,7 +76,7 @@ def clusterctl_local_response(verbose=false)
   clusterctl_response.to_s
 end
 
-def clusterctl_version(clusterctl_response, verbose=false)
+def clusterctl_version(clusterctl_response, verbose = false)
   # example
   # clusterctl version: &version.Info{Major:"0", Minor:"3", GitVersion:"v0.3.9", GitCommit:"e1f67d8ceb1d5b30ef967035f7a0d1b1ee088b37", GitTreeState:"clean", BuildDate:"2020-09-01T02:44:58Z", GoVersion:"go1.13.14", Compiler:"gc", Platform:"linux/amd64"}
   resp = clusterctl_response.match /clusterctl version: &version.Info{(Major:"(([0-9]{1,3})"\, )Minor:"([0-9]{1,3}[+]?)")/
@@ -87,5 +87,3 @@ def clusterctl_version(clusterctl_response, verbose=false)
     ""
   end
 end
-
-

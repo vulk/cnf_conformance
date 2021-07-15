@@ -14,7 +14,7 @@ describe "CNF Test Suite all Network Chaos" do
   # end
 
   # it "'all' should run the whole test suite" do
-    # `./cnf-testsuite samples_cleanup`
+  # `./cnf-testsuite samples_cleanup`
 
   # response_s = `./cnf-testsuite all ~platform ~compatibilty ~state ~security ~scalability ~configuration_lifecycle ~observability ~installability ~hardware_and_scheduling ~microservice ~chaos_cpu_hog ~chaos_container_kill cnf-config=./sample-cnfs/k8s-multiple-deployments/cnf-testsuite.yml deploy_with_chart=false verbose`
   #   response_s = `./cnf-testsuite all ~platform ~compatibilty ~state ~security ~scalability ~configuration_lifecycle ~observability ~installability ~hardware_and_scheduling ~microservice ~chaos_network_loss ~chaos_cpu_hog ~chaos_container_kill cnf-config=./sample-cnfs/k8s-multiple-deployments/cnf-testsuite.yml deploy_with_chart=false verbose`

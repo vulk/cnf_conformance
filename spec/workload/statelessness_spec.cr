@@ -11,7 +11,7 @@ describe "State" do
     `./cnf-testsuite configuration_file_setup`
   end
 
-  it "'volume_hostpath_not_found' should pass if the cnf doesn't have a hostPath volume", tags: ["volume_hostpath_not_found"]  do
+  it "'volume_hostpath_not_found' should pass if the cnf doesn't have a hostPath volume", tags: ["volume_hostpath_not_found"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-coredns-cnf/cnf-testsuite.yml`
       $?.success?.should be_true
@@ -24,7 +24,7 @@ describe "State" do
     end
   end
 
-  it "'volume_hostpath_not_found' should fail if the cnf has a hostPath volume", tags: ["volume_hostpath_not_found"]  do
+  it "'volume_hostpath_not_found' should fail if the cnf has a hostPath volume", tags: ["volume_hostpath_not_found"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-fragile-state/cnf-testsuite.yml deploy_with_chart=false`
       $?.success?.should be_true
@@ -37,7 +37,7 @@ describe "State" do
     end
   end
 
-  it "'no_local_volume_configuration' should fail if local storage configuration found", tags: ["no_local_volume_configuration"]  do
+  it "'no_local_volume_configuration' should fail if local storage configuration found", tags: ["no_local_volume_configuration"] do
     begin
       # update the helm parameter with a schedulable node for the pv chart
       schedulable_nodes = KubectlClient::Get.schedulable_nodes
@@ -54,7 +54,7 @@ describe "State" do
     end
   end
 
-  it "'no_local_volume_configuration' should pass if local storage configuration is not found", tags: ["no_local_volume_configuration"]  do
+  it "'no_local_volume_configuration' should pass if local storage configuration is not found", tags: ["no_local_volume_configuration"] do
     begin
       `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample-coredns-cnf/cnf-testsuite.yml verbose`
       $?.success?.should be_true

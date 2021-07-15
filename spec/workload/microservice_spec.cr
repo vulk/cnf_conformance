@@ -8,8 +8,7 @@ require "file_utils"
 require "sam"
 
 describe "Microservice" do
-
-  it "'reasonable_startup_time' should pass if the cnf has a reasonable startup time(helm_directory)", tags: ["reasonable_startup_time"]  do
+  it "'reasonable_startup_time' should pass if the cnf has a reasonable startup time(helm_directory)", tags: ["reasonable_startup_time"] do
     begin
       LOGGING.info `./cnf-testsuite cnf_setup cnf-path=sample-cnfs/sample_coredns`
       response_s = `./cnf-testsuite reasonable_startup_time verbose`
@@ -35,11 +34,11 @@ describe "Microservice" do
     end
   end
 
-  it "'reasonable_image_size' should pass if image is smaller than 5gb", tags: ["reasonable_image_size"]  do
+  it "'reasonable_image_size' should pass if image is smaller than 5gb", tags: ["reasonable_image_size"] do
     if ENV["PROTECTED_DOCKERHUB_USERNAME"]? && ENV["PROTECTED_DOCKERHUB_PASSWORD"]? && ENV["PROTECTED_DOCKERHUB_EMAIL"]?
-         cnf="./sample-cnfs/sample_coredns_protected"
-       else
-         cnf="./sample-cnfs/sample-coredns-cnf"
+      cnf = "./sample-cnfs/sample_coredns_protected"
+    else
+      cnf = "./sample-cnfs/sample-coredns-cnf"
     end
     LOGGING.info `./cnf-testsuite cnf_setup cnf-path=#{cnf}`
     response_s = `./cnf-testsuite reasonable_image_size verbose`
@@ -61,7 +60,7 @@ describe "Microservice" do
   end
 
   it "'reasonable_image_size' should skip if dockerd does not install", tags: ["reasonable_image_size"] do
-    cnf="./sample-cnfs/sample-coredns-cnf"
+    cnf = "./sample-cnfs/sample-coredns-cnf"
     LOGGING.info `./cnf-testsuite cnf_setup cnf-path=#{cnf}`
     LOGGING.info `./cnf-testsuite uninstall_dockerd`
     dockerd_tempname_helper

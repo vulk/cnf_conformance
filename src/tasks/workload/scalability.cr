@@ -19,9 +19,8 @@ task "increase_decrease_capacity", ["increase_capacity", "decrease_capacity"] do
   VERBOSE_LOGGING.info "increase_decrease_capacity" if check_verbose(args)
 end
 
-
 def increase_decrease_capacity_failure_msg(target_replicas, emoji)
-<<-TEMPLATE
+  <<-TEMPLATE
 ✖️  FAILURE: Replicas did not reach #{target_replicas} #{emoji}
 
 To address this issue please see the USAGE.md documentation
@@ -33,24 +32,24 @@ desc "Test increasing capacity by setting replicas to 1 and then increasing to 3
 task "increase_capacity" do |_, args|
   CNFManager::Task.task_runner(args) do |args, config|
     VERBOSE_LOGGING.info "increase_capacity" if check_verbose(args)
-    emoji_increase_capacity="📦📈"
+    emoji_increase_capacity = "📦📈"
 
     target_replicas = "3"
     base_replicas = "1"
     # TODO scale replicatsets separately
     # https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#scaling-a-replicaset
     # resource["kind"].as_s.downcase == "replicaset"
-    task_response = CNFManager.cnf_workload_resources(args, config) do | resource|
+    task_response = CNFManager.cnf_workload_resources(args, config) do |resource|
       if resource["kind"].as_s.downcase == "deployment" ||
-          resource["kind"].as_s.downcase == "statefulset"
+         resource["kind"].as_s.downcase == "statefulset"
         final_count = change_capacity(base_replicas, target_replicas, args, config, resource)
         target_replicas == final_count
       else
         true
       end
     end
-    # if target_replicas == final_count 
-    if task_response.none?(false) 
+    # if target_replicas == final_count
+    if task_response.none?(false)
       upsert_passed_task("increase_capacity", "✔️  PASSED: Replicas increased to #{target_replicas} #{emoji_increase_capacity}")
     else
       upsert_failed_task("increase_capacity", increase_decrease_capacity_failure_msg(target_replicas, emoji_increase_capacity))
@@ -64,22 +63,22 @@ task "decrease_capacity" do |_, args|
     VERBOSE_LOGGING.info "decrease_capacity" if check_verbose(args)
     target_replicas = "1"
     base_replicas = "3"
-    task_response = CNFManager.cnf_workload_resources(args, config) do | resource|
+    task_response = CNFManager.cnf_workload_resources(args, config) do |resource|
       # TODO scale replicatsets separately
       # https://kubernetes.io/docs/concepts/workloads/controllers/replicaset/#scaling-a-replicaset
       # resource["kind"].as_s.downcase == "replicaset"
       if resource["kind"].as_s.downcase == "deployment" ||
-          resource["kind"].as_s.downcase == "statefulset"
+         resource["kind"].as_s.downcase == "statefulset"
         final_count = change_capacity(base_replicas, target_replicas, args, config, resource)
         target_replicas == final_count
       else
         true
       end
     end
-    emoji_decrease_capacity="📦📉"
+    emoji_decrease_capacity = "📦📉"
 
-    # if target_replicas == final_count 
-    if task_response.none?(false) 
+    # if target_replicas == final_count
+    if task_response.none?(false)
       upsert_passed_task("decrease_capacity", "✔️  PASSED: Replicas decreased to #{target_replicas} #{emoji_decrease_capacity}")
     else
       upsert_failed_task("decrease_capacity", increase_decrease_capacity_failure_msg(target_replicas, emoji_decrease_capacity))
@@ -87,7 +86,7 @@ task "decrease_capacity" do |_, args|
   end
 end
 
-def change_capacity(base_replicas, target_replica_count, args, config, resource = {kind: "", 
+def change_capacity(base_replicas, target_replica_count, args, config, resource = {kind:     "",
                                                                                    metadata: {name: ""}})
   VERBOSE_LOGGING.info "change_capacity" if check_verbose(args)
   VERBOSE_LOGGING.debug "increase_capacity args.raw: #{args.raw}" if check_verbose(args)
@@ -98,7 +97,7 @@ def change_capacity(base_replicas, target_replica_count, args, config, resource 
   initialization_time = base_replicas.to_i * 10
   VERBOSE_LOGGING.info "resource: #{resource["metadata"]["name"]}" if check_verbose(args)
 
-  #TODO make a KubectlClient.scale command
+  # TODO make a KubectlClient.scale command
   case resource["kind"].as_s.downcase
   when "deployment"
     LOGGING.debug "kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{base_replicas}"
@@ -106,12 +105,12 @@ def change_capacity(base_replicas, target_replica_count, args, config, resource 
     base = `kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{base_replicas}`
   when "statefulset"
     `kubectl scale statefulsets #{resource["metadata"]["name"]} --replicas=#{base_replicas}`
-  else #TODO what else can be scaled?
+  else # TODO what else can be scaled?
     LOGGING.debug "kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{base_replicas}"
 
     base = `kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{base_replicas}`
   end
-  VERBOSE_LOGGING.info "base: #{base}" if check_verbose(args) 
+  VERBOSE_LOGGING.info "base: #{base}" if check_verbose(args)
   initialized_count = wait_for_scaling(resource, base_replicas, args)
   if initialized_count != base_replicas
     VERBOSE_LOGGING.info "#{resource["kind"]} initialized to #{initialized_count} and could not be set to #{base_replicas}" if check_verbose(args)
@@ -124,7 +123,7 @@ def change_capacity(base_replicas, target_replica_count, args, config, resource 
     increase = `kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{target_replica_count}`
   when "statefulset"
     `kubectl scale statefulsets #{resource["metadata"]["name"]} --replicas=#{target_replica_count}`
-  else #TODO what else can be scaled?
+  else # TODO what else can be scaled?
     LOGGING.debug "kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{base_replicas}"
     base = `kubectl scale #{resource["kind"]}.v1.apps/#{resource["metadata"]["name"]} --replicas=#{target_replica_count}`
   end
@@ -162,10 +161,9 @@ def wait_for_scaling(resource, target_replica_count, args)
       second_count = 0
       previous_replicas = current_replicas
     end
-    second_count = second_count + 1 
+    second_count = second_count + 1
     VERBOSE_LOGGING.info "previous_replicas: #{previous_replicas}" if check_verbose(args)
     VERBOSE_LOGGING.info "current_replicas: #{current_replicas}" if check_verbose(args)
   end
   current_replicas
-end 
-
+end

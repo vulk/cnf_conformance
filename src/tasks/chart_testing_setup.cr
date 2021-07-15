@@ -14,4 +14,3 @@ task "install_chart_testing" do |_, args|
     end
   end
 end
-

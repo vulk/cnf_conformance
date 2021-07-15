@@ -6,7 +6,6 @@ require "file_utils"
 require "sam"
 
 describe "AirGap" do
-
   before_all do
     Helm.helm_repo_add("chaos-mesh", "https://charts.chaos-mesh.org")
     LOGGING.info `./cnf-testsuite airgapped output-file=/tmp/airgapped.tar.gz` unless File.exists?("/tmp/airgapped.tar.gz")
@@ -35,18 +34,18 @@ describe "AirGap" do
     pods = KubectlClient::Get.pods_by_nodes(KubectlClient::Get.schedulable_nodes_list)
     pods = KubectlClient::Get.pods_by_label(pods, "name", "cri-tools")
     # Get the generated name of the cri-tools per node
-    pods.map do |pod| 
+    pods.map do |pod|
       pod_name = pod.dig?("metadata", "name")
-      sh = KubectlClient.exec("-ti #{pod_name} -- cat /usr/local/bin/crictl > /dev/null")  
+      sh = KubectlClient.exec("-ti #{pod_name} -- cat /usr/local/bin/crictl > /dev/null")
       sh[:status].success?
-      sh = KubectlClient.exec("-ti #{pod_name} -- cat /usr/local/bin/ctr > /dev/null")  
+      sh = KubectlClient.exec("-ti #{pod_name} -- cat /usr/local/bin/ctr > /dev/null")
       sh[:status].success?
     end
     (/All prerequisites found./ =~ response_s).should_not be_nil
     (/Setup complete/ =~ response_s).should_not be_nil
   end
 
-  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf helm chart in airgapped mode", tags: ["airgap-repo"]  do
+  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf helm chart in airgapped mode", tags: ["airgap-repo"] do
     begin
       response_s = `./cnf-testsuite cnf_setup cnf-config=example-cnfs/coredns/cnf-testsuite.yml airgapped=/tmp/airgapped.tar.gz`
       LOGGING.info response_s
@@ -66,7 +65,7 @@ describe "AirGap" do
     end
   end
 
-  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf helm directory in airgapped mode", tags: ["airgap-directory"]  do
+  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf helm directory in airgapped mode", tags: ["airgap-directory"] do
     begin
       response_s = `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/sample_coredns/cnf-testsuite.yml airgapped=/tmp/airgapped.tar.gz`
       LOGGING.info response_s
@@ -82,7 +81,7 @@ describe "AirGap" do
     end
   end
 
-  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf manifest directory in airgapped mode", tags: ["airgap-manifest"]  do
+  it "'cnf_setup/cnf_cleanup' should install/cleanup a cnf manifest directory in airgapped mode", tags: ["airgap-manifest"] do
     begin
       response_s = `./cnf-testsuite cnf_setup cnf-config=sample-cnfs/k8s-non-helm/cnf-testsuite.yml airgapped=/tmp/airgapped.tar.gz`
       LOGGING.info response_s

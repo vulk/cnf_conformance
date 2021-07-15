@@ -18,7 +18,6 @@ task "privileged" do |_, args|
     VERBOSE_LOGGING.info "white_list_container_names #{white_list_container_names.inspect}" if check_verbose(args)
     violation_list = [] of String
     task_response = CNFManager.workload_resource_test(args, config) do |resource, container, initialized|
-
       privileged_list = KubectlClient::Get.privileged_containers
       white_list_containers = ((PRIVILEGED_WHITELIST_CONTAINERS + white_list_container_names) - [container])
       # Only check the containers that are in the deployed helm chart or manifest
@@ -32,8 +31,8 @@ task "privileged" do |_, args|
       end
     end
     LOGGING.debug "violator list: #{violation_list.flatten}"
-    emoji_security="🔓🔑"
-    if task_response 
+    emoji_security = "🔓🔑"
+    if task_response
       upsert_passed_task("privileged", "✔️  PASSED: No privileged containers #{emoji_security}")
     else
       upsert_failed_task("privileged", "✖️  FAILED: Found #{violation_list.size} privileged containers: #{violation_list.inspect} #{emoji_security}")
