@@ -738,7 +738,6 @@ module CNFManager
       immutable_configmap = true
     end
 
-    # TODO save to an [preferrably immutable] config map 
     #TODO if helm_install then set helm_deploy = true in template
     LOGGING.info "save config"
     elapsed_time_template = Crinja.render(configmap_temp, { "helm_install" => helm_used, "release_name" => "cnf-testsuite-#{release_name}-startup-information", "elapsed_time" => "#{elapsed_time.seconds}", "immutable" => immutable_configmap})
