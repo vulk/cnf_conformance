@@ -471,8 +471,8 @@ module KubectlClient
         all_kind = `kubectl get #{kind} --namespace=#{namespace}`
         case kind.downcase
         when "replicaset", "deployment", "statefulset"
-          current_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o=jsonpath='{.status.readyReplicas}'`
-          desired_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o=jsonpath='{.status.replicas}'`
+          current_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o='jsonpath={.status.readyReplicas}'`
+          desired_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o='jsonpath={.status.replicas}'`
         when "daemonset"
           current_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o=jsonpath='{.status.numberAvailable}'`
           desired_replicas = `kubectl get #{kind} --namespace=#{namespace} #{resource_name} -o=jsonpath='{.status.desiredNumberScheduled}'`
